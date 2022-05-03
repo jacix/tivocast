@@ -1,0 +1,16 @@
+title : CBS Sunday Morning
+seriesTitle : CBS Sunday Morning
+description : Holly Williams has the latest news from the war in Ukraine. David Martin reports that Russia's war with Ukraine is beginning to echo the country's failed effort in Afghanistan. 
+time : 2022-03-27T13:00:00Z
+isEpisode : true
+iso_duration : PT1H30M
+originalAirDate : 2022-03-27T00:00:00Z
+episodeTitle : 03-27-2022
+isEpisodic : true
+showingBits : 3
+episodeNumber : 40224
+displayMajorNumber : 2
+callsign : WCBS
+seriesId : SH0000018954
+programId : EP0000018954-0454665605
+vHost : Pauley|Jane
