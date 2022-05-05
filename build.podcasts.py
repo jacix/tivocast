@@ -2,7 +2,7 @@
 #
 # rewrite of Jason's tivo-to-podcast bash script
 
-TESTING='true'
+TESTING='false'
 
 from xml.dom import minidom
 import datetime
@@ -10,6 +10,7 @@ from datetime import datetime
 import re
 import pytz
 import os
+from pathlib import Path
 
 PODCASTDIR="/usr/local/www/data/podcast"
 VIDEODIR=PODCASTDIR + "/video"
@@ -65,6 +66,7 @@ def parse_tivo_file(p_videofile):
         episodeFile, episodeExt = os.path.splitext(episodeBasename)
         episodeTitle = episodeFile.replace('_', ' ')
         for line in txtfile:
+            description=""
             if re.search('^description', line):
                 label,description=line.split(' : ',1)
                 description=description.strip()
@@ -74,16 +76,12 @@ def parse_tivo_file(p_videofile):
             if re.search('^originalAirDate', line):
                 label,raworiginalAirDate=line.split(' : ',1)
                 raworiginalAirDate=raworiginalAirDate.strip()
-        #print(description)
-        #print(seriestitle)
-        #print(raworiginalairdate)
         originalAirDateUTC_dt = datetime.strptime(raworiginalAirDate,'%Y-%m-%dT%H:%M:%SZ')
         #local_timezone = pytz.timezone('UTC')
         #originalAirDateLocal = originalAirDateUTC.astimezone(local_timezone)
         format = "%a, %d %b %Y %T %Z"
         #originalAirDate_str = originalAirDateUTC_dt.strftime(format)
         originalAirDate_str = originalAirDateUTC_dt.strftime("%a, %d %b %Y %T %Z")
-        print(originalAirDate_str)
         if re.search('The_Daily_Show.*', p_videofile):
             link='dailyshow'
         elif re.search('.*(CBS_Sunday_Morning|60_Minutes).*', p_videofile):
@@ -96,15 +94,30 @@ def parse_tivo_file(p_videofile):
         if TESTING == 'true':
             print('Deleting xml file' + xmlfile)
             os.remove(xmlfile)
+        # If there isn't already an xml file for this show, create it and add to the list of all xml files
         if not os.path.isfile(xmlfile):
             write_channel(xmlfile, seriesTitle,link)
+            allxmlfiles.append(xmlfile)
         write_item(xmlfile, episodeTitle, link, os.path.basename(p_videofile), description, fileSize, originalAirDate_str)
-        write_footer(xmlfile)
 
 if __name__ == "__main__":
     """
     usage goes here
     """
-    parse_tivo_file(VIDEOFILE)
+    # create list for all created xml files so they can have the footer added at the end
+    allxmlfiles = []
+
+    # remove existing xml files
+    for deleteme in Path(VIDEODIR).glob('*.xml'):
+        print("deleting", deleteme)
+        deleteme.unlink()
+
+    # read the mp4 files and create the header (if necessary) and the items
+    for videofile in Path(VIDEODIR).glob('*.mp4'):
+        parse_tivo_file(str(videofile))
+
+    # add the footer to all files
+    for finalizefile in allxmlfiles:
+        write_footer(finalizefile)
     print("complete at", datetime.now())
     #print("complete at UTC", datetime.utcnow())
