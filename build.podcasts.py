@@ -19,7 +19,7 @@ VIDEOFILE=VIDEODIR + "/CBS_Sunday_Morning_-_03-27-2022_ep40224_Sun_Mar_27_BlackB
 URL='https://podcast.jasons.us'
 pubDate=datetime.now().strftime("%a, %d %b %Y %H:%M:%S EST")
 
-def write_channel_header(p_xmlfile, p_title, p_link):
+def create_channel_header(p_xmlfile, p_title, p_link):
     global all_xml
     all_xml = (
         f'<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -43,7 +43,7 @@ def write_channel_header(p_xmlfile, p_title, p_link):
         f'      </image>\n'
     )
 
-def write_item(p_xmlfile, p_title, p_link, p_filename, p_description, p_size, p_airdate):
+def create_episode(p_xmlfile, p_title, p_link, p_filename, p_description, p_size, p_airdate):
     global all_xml
     all_xml = (
         f'{all_xml}'
@@ -58,7 +58,7 @@ def write_item(p_xmlfile, p_title, p_link, p_filename, p_description, p_size, p_
         f'      </item>\n'
     )
 
-def write_footer(p_xmlfile):
+def create_footer(p_xmlfile):
     global all_xml
     all_xml = (
         f'{all_xml}'
@@ -103,9 +103,9 @@ def parse_tivo_metadata_file(p_videofile):
             os.remove(xmlfile)
         # If there isn't already an xml file for this show, create it and add to the list of all xml files
         if not os.path.isfile(xmlfile):
-            write_channel_header(xmlfile, seriesTitle,link)
+            create_channel_header(xmlfile, seriesTitle,link)
             allxmlfiles.append(xmlfile)
-        write_item(xmlfile, episodeTitle, link, os.path.basename(p_videofile), description, fileSize, originalAirDate_str)
+        create_episode(xmlfile, episodeTitle, link, os.path.basename(p_videofile), description, fileSize, originalAirDate_str)
         with open(xmlfile, 'a') as xmlfile:
             xmlfile.write(all_xml)
 
@@ -127,6 +127,6 @@ if __name__ == "__main__":
 
     # add the footer to all files
     for finalizefile in allxmlfiles:
-        write_footer(finalizefile)
+        create_footer(finalizefile)
     print("complete at", datetime.now())
     #print("complete at UTC", datetime.utcnow())
