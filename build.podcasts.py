@@ -26,20 +26,20 @@ def create_channel_header(p_xmlfile, p_title, p_link):
         f'<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
         f'\n'
         f'   <channel>\n'
-        f'   <title>{p_title}</title>\n'
-        f'      <description>Jason\'s Podcast Of {p_title}</description>\n'
-        f'      <link>{URL}</link>\n'
+        f'   <title> {p_title} </title>\n'
+        f'      <description> Jason\'s Podcast Of {p_title} </description>\n'
+        f'      <link> {URL} </link>\n'
         f'      <atom:link href="{URL}/{p_link}.xml" rel="self" type="application/rss+xml" />\n'
-        f'      <language>en-us</language>\n'
-        f'      <copyright>Copyright 2007</copyright>\n'
-        f'      <lastBuildDate>Tue, 27 Sep 2011 02:50:00 -0500</lastBuildDate>\n'
+        f'      <language> en-us </language>\n'
+        f'      <copyright> Copyright 2007 </copyright>\n'
+        f'      <lastBuildDate> Tue, 27 Sep 2011 02:50:00 -0500 </lastBuildDate>\n'
         f'      <pubDate> {pubDate} </pubDate>\n'
-        f'      <docs>http://blogs.law.harvard.edu/tech/rss</docs>\n'
-        f'      <webMaster>podcasts@jasons.us (Podcast Master) </webMaster>\n'
+        f'      <docs> http://blogs.law.harvard.edu/tech/rss </docs>\n'
+        f'      <webMaster> podcasts@jasons.us (Podcast Master) </webMaster>\n'
         f'      <image>\n'
-        f'         <url>{URL}/images/{p_link}.jpg</url>\n'
-        f'         <title>{p_title}</title>\n'
-        f'         <link>{URL}</link>\n'
+        f'         <url> {URL}/images/{p_link}.jpg </url>\n'
+        f'         <title> {p_title} </title>\n'
+        f'         <link> {URL} </link>\n'
         f'      </image>\n'
     )
 
@@ -51,9 +51,9 @@ def create_episode(p_xmlfile, p_title, p_link, p_filename, p_description, p_size
         f'         <title> {p_title} </title>\n'
         f'         <link> {URL}/{p_link}.xml </link>\n'
         f'         <guid isPermaLink="true"> {URL}/video/{p_filename} </guid>\n'
-        f'         <description>  {p_description} </description>\n'
+        f'         <description> {p_description} </description>\n'
         f'         <enclosure url="{URL}/video/{p_filename}" length="{str(p_size)}" type="video/mpeg" />\n'
-        f'         <category>Podcasts</category>\n'
+        f'         <category> Podcasts </category>\n'
         f'         <pubDate> {pubDate} </pubDate>\n'
         f'      </item>\n'
     )
@@ -73,7 +73,6 @@ def parse_tivo_metadata_file(p_videofile):
         episodeFile, episodeExt = os.path.splitext(episodeBasename)
         episodeTitle = episodeFile.replace('_', ' ')
         for line in txtfile:
-            description=""
             if re.search('^description', line):
                 label,description=line.split(' : ',1)
                 description=description.strip()
@@ -93,7 +92,7 @@ def parse_tivo_metadata_file(p_videofile):
             link='dailyshow'
         elif re.search('.*(CBS_Sunday_Morning|60_Minutes).*', p_videofile):
             link='60minutes'
-            seriesTitle="Weekly News shows."
+            seriesTitle="Weekly News shows"
         else:
             link='adhoc'
             seriesTitle='Random Stuff'
