@@ -12,54 +12,61 @@ import pytz
 import os
 from pathlib import Path
 
-PODCASTDIR="/usr/local/www/data/podcast"
+#PODCASTDIR="/usr/local/www/data/podcast"
+PODCASTDIR="/Users/jason/tmp/tivocast"
 VIDEODIR=PODCASTDIR + "/video"
 VIDEOFILE=VIDEODIR + "/CBS_Sunday_Morning_-_03-27-2022_ep40224_Sun_Mar_27_BlackBolt.mp4"
 URL='https://podcast.jasons.us'
 pubDate=datetime.now().strftime("%a, %d %b %Y %H:%M:%S EST")
 
-def write_channel(p_xmlfile, p_title, p_link):
-    xmlfile = open(p_xmlfile, 'w')
-    xmlfile.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-    xmlfile.write('<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n')
-    xmlfile.write('\n')
-    xmlfile.write('   <channel>\n')
-    xmlfile.write('   <title>' + p_title + '</title>\n')
-    xmlfile.write('      <description>Jason\'s Podcast Of ' + p_title + '</description>\n')
-    xmlfile.write('      <link>' + URL + '</link>\n')
-    xmlfile.write('      <atom:link href="' + URL + '/' + p_link + '.xml" rel="self" type="application/rss+xml" />\n')
-    xmlfile.write('      <language>en-us</language>\n')
-    xmlfile.write('      <copyright>Copyright 2007</copyright>\n')
-    xmlfile.write('      <lastBuildDate>Tue, 27 Sep 2011 02:50:00 -0500</lastBuildDate>\n')
-    xmlfile.write('      <pubDate>' + pubDate + '</pubDate>\n')
-    xmlfile.write('      <docs>http://blogs.law.harvard.edu/tech/rss</docs>\n')
-    xmlfile.write('      <webMaster>podcasts@jasons.us (Podcast Master) </webMaster>\n')
-    xmlfile.write('      <image>\n')
-    xmlfile.write('         <url>' + URL + '/images/' + p_link + '.jpg</url>\n')
-    xmlfile.write('         <title>' + p_title + '</title>\n')
-    xmlfile.write('         <link>' + URL + '</link>\n')
-    xmlfile.write('      </image>\n')
-    xmlfile.close()
+def write_channel_header(p_xmlfile, p_title, p_link):
+    global all_xml
+    all_xml = (
+        f'<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+        f'\n'
+        f'   <channel>\n'
+        f'   <title>{p_title}</title>\n'
+        f'      <description>Jason\'s Podcast Of {p_title}</description>\n'
+        f'      <link>{URL}</link>\n'
+        f'      <atom:link href="{URL}/{p_link}.xml" rel="self" type="application/rss+xml" />\n'
+        f'      <language>en-us</language>\n'
+        f'      <copyright>Copyright 2007</copyright>\n'
+        f'      <lastBuildDate>Tue, 27 Sep 2011 02:50:00 -0500</lastBuildDate>\n'
+        f'      <pubDate> {pubDate} </pubDate>\n'
+        f'      <docs>http://blogs.law.harvard.edu/tech/rss</docs>\n'
+        f'      <webMaster>podcasts@jasons.us (Podcast Master) </webMaster>\n'
+        f'      <image>\n'
+        f'         <url>{URL}/images/{p_link}.jpg</url>\n'
+        f'         <title>{p_title}</title>\n'
+        f'         <link>{URL}</link>\n'
+        f'      </image>\n'
+    )
 
 def write_item(p_xmlfile, p_title, p_link, p_filename, p_description, p_size, p_airdate):
-    xmlfile = open(p_xmlfile, 'a')
-    xmlfile.write('      <item>\n')
-    xmlfile.write('         <title>' + p_title + '</title>\n')
-    xmlfile.write('         <link>' + URL + '/' + p_link + '.xml</link>\n')
-    xmlfile.write('         <guid isPermaLink="true">' + URL + '/video/' + p_filename + '</guid>\n')
-    xmlfile.write('         <description>' + p_description + '</description>\n')
-    xmlfile.write('         <enclosure url="' + URL + '/video/' + p_filename + '" length="' + str(p_size) + '" type="video/mpeg" />\n')
-    xmlfile.write('         <category>Podcasts</category>\n')
-    xmlfile.write('         <pubDate>' + pubDate + '</pubDate>\n')
-    xmlfile.write('      </item>\n')
-    xmlfile.close()
+    global all_xml
+    all_xml = (
+        f'{all_xml}'
+        f'      <item>\n'
+        f'         <title> {p_title} </title>\n'
+        f'         <link> {URL}/{p_link}.xml </link>\n'
+        f'         <guid isPermaLink="true"> {URL}/video/{p_filename} </guid>\n'
+        f'         <description>  {p_description} </description>\n'
+        f'         <enclosure url="{URL}/video/{p_filename}" length="{str(p_size)}" type="video/mpeg" />\n'
+        f'         <category>Podcasts</category>\n'
+        f'         <pubDate> {pubDate} </pubDate>\n'
+        f'      </item>\n'
+    )
 
 def write_footer(p_xmlfile):
-    xmlfile = open(p_xmlfile, 'a')
-    xmlfile.write('   </channel>\n')
-    xmlfile.write('</rss>\n')
-
-def parse_tivo_file(p_videofile):
+    global all_xml
+    all_xml = (
+        f'{all_xml}'
+        f'   </channel>\n'
+        f'</rss>\n'
+     )
+    
+def parse_tivo_metadata_file(p_videofile):
     with open(p_videofile + '.txt', 'r',newline='\n') as txtfile:
         fileSize = os.path.getsize(p_videofile)
         episodeBasename = os.path.basename(p_videofile)
@@ -96,9 +103,11 @@ def parse_tivo_file(p_videofile):
             os.remove(xmlfile)
         # If there isn't already an xml file for this show, create it and add to the list of all xml files
         if not os.path.isfile(xmlfile):
-            write_channel(xmlfile, seriesTitle,link)
+            write_channel_header(xmlfile, seriesTitle,link)
             allxmlfiles.append(xmlfile)
         write_item(xmlfile, episodeTitle, link, os.path.basename(p_videofile), description, fileSize, originalAirDate_str)
+        with open(xmlfile, 'a') as xmlfile:
+            xmlfile.write(all_xml)
 
 if __name__ == "__main__":
     """
@@ -114,7 +123,7 @@ if __name__ == "__main__":
 
     # read the mp4 files and create the header (if necessary) and the items
     for videofile in Path(VIDEODIR).glob('*.mp4'):
-        parse_tivo_file(str(videofile))
+        parse_tivo_metadata_file(str(videofile))
 
     # add the footer to all files
     for finalizefile in allxmlfiles:
